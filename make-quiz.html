@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Train your brain - Make Quiz</title>
+  <style>
+    /* CSS-Styling für die Make Quiz-Seite */
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .main-content {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Train your brain - Make Quiz</h1>
+  </header>
+
+  <div class="main-content">
+    <form id="quizForm">
+      <label for="question">Frage:</label>
+      <input type="text" id="question" name="question" required>
+
+      <label for="option1">Option A:</label>
+      <input type="text" id="option1" name="option1" required>
+
+      <label for="option2">Option B:</label>
+      <input type="text" id="option2" name="option2" required>
+
+      <label for="option3">Option C:</label>
+      <input type="text" id="option3" name="option3" required>
+
+      <label for="option4">Option D:</label>
+      <input type="text" id="option4" name="option4" required>
+
+      <label for="correctOption">Richtige Option (A-E, E ist keine Antwort):</label>
+      <input type="text" id="correctOption" name="correctOption" maxlength="1" required>
+
+      <label for="correctOption2">Zweite richtige Option (A-E, E ist keine Antwort):</label>
+      <input type="text" id="correctOption2" name="correctOption2" maxlength="1" required>
+
+      <button type="submit">Quizfrage erstellen</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('quizForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Verhindert das Neuladen der Seite nach dem Absenden des Formulars
+
+      // Hole die eingegebenen Werte
+      var question = document.getElementById('question').value;
+      var option1 = document.getElementById('option1').value;
+      var option2 = document.getElementById('option2').value;
+      var option3 = document.getElementById('option3').value;
+      var option4 = document.getElementById('option4').value;
+      var correctOption = document.getElementById('correctOption').value.toUpperCase();
+      var correctOption2 = document.getElementById('correctOption2').value.toUpperCase();
+
+      // Erstelle ein JSON-Objekt mit den eingegebenen Werten
+      var quizData = {
+        question: question,
+        answer: {
+          A: option1,
+          B: option2,
+          C: option3,
+          D: option4
+        },
+        correct_answer: [correctOption, correctOption2]
+      };
+
+      // Sende die POST-Anfrage an den Server
+      fetch('/frage-hinzufuegen', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(quizData)
+      })
+        .then(function(response) {
+          if (response.ok) {
+            // Zeige eine Erfolgsmeldung an
+            alert('Die Quizfrage wurde erfolgreich erstellt und gespeichert.');
+            // Leere die Eingabefelder
+            document.getElementById('quizForm').reset();
+          } else {
+            // Zeige eine Fehlermeldung an
+            alert('Beim Speichern der Quizfrage ist ein Fehler aufgetreten.');
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+          // Zeige eine Fehlermeldung an
+          alert('Beim Speichern der Quizfrage ist ein Fehler aufgetreten.');
+        });
+    });
+  </script>
+</body>
+</html>
