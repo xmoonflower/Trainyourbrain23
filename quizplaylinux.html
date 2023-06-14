@@ -16,6 +16,12 @@
       align-items: center;
     }
 
+    .profile-name {
+      margin-left: auto;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+
     .main-content {
       text-align: center;
       margin-top: 50px;
@@ -103,6 +109,7 @@
 <body>
   <header>
     <h1>Train your brain - Quiz</h1>
+    <div class="profile-name"></div>
   </header>
 
   <div class="main-content">
@@ -165,6 +172,21 @@
   </div>
 
      <script>
+    // Erhalte das Profilnamen-Element
+    const profileNameElement = document.querySelector('.profile-name');
+
+    // Überprüfe, ob das `username`-Cookie vorhanden ist
+    if (document.cookie.includes('username')) {
+      // Extrahiere den Wert des `username`-Cookies
+      const username = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('username='))
+        .split('=')[1];
+
+      // Setze den Profilnamen im HTML-Element
+      profileNameElement.textContent = username;}
+
+
   var currentQuestionIndex = 0;
     var score = 0;
 
@@ -316,5 +338,3 @@
   
 </body>
 </html>
-
-
