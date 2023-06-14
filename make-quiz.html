@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Train your brain - Make Quiz</title>
+ 
   <style>
     /* CSS-Styling für die Make Quiz-Seite */
     body {
@@ -47,6 +48,7 @@
       cursor: pointer;
     }
   </style>
+
 </head>
 <body>
   <header>
@@ -70,13 +72,10 @@
       <label for="option4">Option D:</label>
       <input type="text" id="option4" name="option4" required>
 
-      <label for="correctOption">Richtige Option (A-E, E ist keine Antwort):</label>
+      <label for="correctOption">Richtige Option:</label>
       <input type="text" id="correctOption" name="correctOption" maxlength="1" required>
 
-      <label for="correctOption2">Zweite richtige Option (A-E, E ist keine Antwort):</label>
-      <input type="text" id="correctOption2" name="correctOption2" maxlength="1" required>
-
-      <button type="submit">Quizfrage erstellen</button>
+  <button type="submit">Quizfrage erstellen</button>
     </form>
   </div>
 
@@ -91,7 +90,7 @@
       var option3 = document.getElementById('option3').value;
       var option4 = document.getElementById('option4').value;
       var correctOption = document.getElementById('correctOption').value.toUpperCase();
-      var correctOption2 = document.getElementById('correctOption2').value.toUpperCase();
+      
 
       // Erstelle ein JSON-Objekt mit den eingegebenen Werten
       var quizData = {
@@ -102,10 +101,13 @@
           C: option3,
           D: option4
         },
-        correct_answer: [correctOption, correctOption2]
+        correct_answer: [correctOption]
+
       };
 
-      // Sende die POST-Anfrage an den Server
+
+
+      // Daten werden an den Server gesendet///////////////////////////////////////////////////////
       fetch('/frage-hinzufuegen', {
         method: 'POST',
         headers: {
