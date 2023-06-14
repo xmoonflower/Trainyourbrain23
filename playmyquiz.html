@@ -16,6 +16,12 @@
       align-items: center;
     }
 
+    .profile-name {
+      margin-left: auto;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+
     .main-content {
       text-align: center;
       margin-top: 50px;
@@ -103,6 +109,7 @@
 <body>
   <header>
     <h1>Train your brain - Quiz</h1>
+    <div class="profile-name"></div>
   </header>
 
   <div class="main-content">
@@ -165,6 +172,20 @@
   </div>
 
   <script>
+        // Erhalte das Profilnamen-Element
+        const profileNameElement = document.querySelector('.profile-name');
+
+// Überprüfe, ob das `username`-Cookie vorhanden ist
+if (document.cookie.includes('username')) {
+  // Extrahiere den Wert des `username`-Cookies
+  const username = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('username='))
+    .split('=')[1];
+
+  // Setze den Profilnamen im HTML-Element
+  profileNameElement.textContent = username;}
+
     var currentQuestionIndex = 0;
     var score = 0;
     var questions = [];
@@ -187,11 +208,24 @@
       document.getElementById("option2").checked = false;
       document.getElementById("option3").checked = false;
       document.getElementById("option4").checked = false;
+
+      displayScore();
     }
 
     function getQuestions() {
-      questions = [{"question":"hkjsnwqknnwkwskbws","answer":{"A":"nwqsnqo","B":"kbjdqsbkjq","C":"kdnbkwdkdb","D":"kjdnsdx"},"correct_answer":["A","E"]},{"question":"jan","answer":{"A":"anna","B":"berta","C":"paul","D":"don"},"correct_answer":["B","A"]}];
-      displayQuestion();
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/frage", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            questions = JSON.parse(xhr.responseText);
+            displayQuestion();
+          } else {
+            console.error("Fehler beim Abrufen der Fragen.");
+          }
+        }
+      };
+      xhr.send();
     }
 
     getQuestions();
@@ -208,12 +242,20 @@
           displayPopup("correct");
         } else {
           displayPopup("wrong");
-          document.getElementById("correctAnswer").innerText = questions[currentQuestionIndex].answer[correctAnswer[0]];
+          var correctAnswerElement = document.getElementById("correctAnswer");
+          var correctOptions = questions[currentQuestionIndex].correct_answer;
+          var correctOptionsText = correctOptions.map(option => questions[currentQuestionIndex].answer[option]).join(', ');
+          correctAnswerElement.innerText = correctOptionsText;
         }
 
         displayScore();
       }
     }
+
+    var correctAnswerElement = document.getElementById("correctAnswer");
+    var correctOptions = questions[currentQuestionIndex].correct_answer;
+    var correctOptionsText = correctOptions.map(option => questions[currentQuestionIndex].answer[option]).join(', ');
+    correctAnswerElement.innerText = correctOptionsText;
 
     function displayScore() {
       var scoreElement = document.getElementById("score");
@@ -221,12 +263,15 @@
     }
 
     function nextQuestion() {
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        displayQuestion();
-      } else {
-        endQuiz();
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex >= questions.length) {
+        alert("Das Quiz ist beendet. Dein Endergebnis: " + score + " von " + questions.length);
+        currentQuestionIndex = 0;
+        score = 0;
       }
+
+      displayQuestion();
     }
 
     function goToStartPage() {
@@ -236,10 +281,13 @@
     }
 
     function goBack() {
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        displayQuestion();
+      currentQuestionIndex--;
+
+      if (currentQuestionIndex < 0) {
+        currentQuestionIndex = questions.length - 1;
       }
+
+      displayQuestion();
     }
 
     function shuffleQuestions() {
@@ -248,14 +296,16 @@
     }
 
     function shuffleArray(array) {
-      var currentIndex = array.length, randomIndex;
+      var currentIndex = array.length,
+        randomIndex;
 
       while (currentIndex != 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
 
         [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex], array[currentIndex]
+          array[randomIndex],
+          array[currentIndex]
         ];
       }
 
@@ -282,13 +332,7 @@
       wrongPopup.style.display = "none";
     }
 
-    function endQuiz() {
-      alert("Das Quiz ist beendet. Dein Endergebnis: " + score + " von " + questions.length);
-      currentQuestionIndex = 0;
-      score = 0;
-      displayScore();
-      displayQuestion();
-    }
+    displayQuestion();
   </script>
 </body>
 </html>
