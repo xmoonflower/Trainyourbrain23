@@ -172,167 +172,184 @@
   </div>
 
   <script>
-        // Erhalte das Profilnamen-Element
-        const profileNameElement = document.querySelector('.profile-name');
-
-// Überprüfe, ob das `username`-Cookie vorhanden ist
-if (document.cookie.includes('username')) {
-  // Extrahiere den Wert des `username`-Cookies
-  const username = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('username='))
-    .split('=')[1];
-
-  // Setze den Profilnamen im HTML-Element
-  profileNameElement.textContent = username;}
-
+    // Erhalte das Profilnamen-Element
+    const profileNameElement = document.querySelector('.profile-name');
+  
+    // Überprüfe, ob das `username`-Cookie vorhanden ist
+    if (document.cookie.includes('username')) {
+      // Extrahiere den Wert des `username`-Cookies
+      const username = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('username='))
+        .split('=')[1];
+  
+      // Setze den Profilnamen im HTML-Element
+      profileNameElement.textContent = username;
+    }
+  
     var currentQuestionIndex = 0;
     var score = 0;
     var questions = [];
-
+  
     function displayQuestion() {
-      var questionTextElement = document.getElementById("questionText");
+      var questionTextElement = document.getElementById('questionText');
       questionTextElement.innerText = questions[currentQuestionIndex].question;
-
-      var label1 = document.getElementById("label1");
-      var label2 = document.getElementById("label2");
-      var label3 = document.getElementById("label3");
-      var label4 = document.getElementById("label4");
-
+  
+      var label1 = document.getElementById('label1');
+      var label2 = document.getElementById('label2');
+      var label3 = document.getElementById('label3');
+      var label4 = document.getElementById('label4');
+  
       label1.innerText = questions[currentQuestionIndex].answer.A;
       label2.innerText = questions[currentQuestionIndex].answer.B;
       label3.innerText = questions[currentQuestionIndex].answer.C;
       label4.innerText = questions[currentQuestionIndex].answer.D;
-
-      document.getElementById("option1").checked = false;
-      document.getElementById("option2").checked = false;
-      document.getElementById("option3").checked = false;
-      document.getElementById("option4").checked = false;
-
+  
+      document.getElementById('option1').checked = false;
+      document.getElementById('option2').checked = false;
+      document.getElementById('option3').checked = false;
+      document.getElementById('option4').checked = false;
+  
       displayScore();
     }
-
+  
     function getQuestions() {
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/frage", true);
-      xhr.onreadystatechange = function() {
+      xhr.open('GET', '/frage', true);
+      xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
             questions = JSON.parse(xhr.responseText);
             displayQuestion();
           } else {
-            console.error("Fehler beim Abrufen der Fragen.");
+            console.error('Fehler beim Abrufen der Fragen.');
           }
         }
       };
       xhr.send();
     }
-
+  
     getQuestions();
-
+  
     function checkAnswer() {
       var selectedOption = document.querySelector('input[name="answer"]:checked');
-
+  
       if (selectedOption !== null) {
         var selectedValue = selectedOption.value;
         var correctAnswer = questions[currentQuestionIndex].correct_answer;
-
+  
         if (correctAnswer.includes(selectedValue)) {
           score++;
-          displayPopup("correct");
+          displayPopup('correct');
         } else {
-          displayPopup("wrong");
-          var correctAnswerElement = document.getElementById("correctAnswer");
+          displayPopup('wrong');
+          var correctAnswerElement = document.getElementById('correctAnswer');
           var correctOptions = questions[currentQuestionIndex].correct_answer;
-          var correctOptionsText = correctOptions.map(option => questions[currentQuestionIndex].answer[option]).join(', ');
+          var correctOptionsText = correctOptions
+            .map(option => questions[currentQuestionIndex].answer[option])
+            .join(', ');
           correctAnswerElement.innerText = correctOptionsText;
         }
-
+  
         displayScore();
       }
     }
-
-    var correctAnswerElement = document.getElementById("correctAnswer");
-    var correctOptions = questions[currentQuestionIndex].correct_answer;
-    var correctOptionsText = correctOptions.map(option => questions[currentQuestionIndex].answer[option]).join(', ');
-    correctAnswerElement.innerText = correctOptionsText;
-
+  
+    function sendScoreToServer() {
+      // Erstelle ein Objekt mit den Daten, die du senden möchtest
+      var data = {
+        username: username, // Benutzername
+        score: score // Score
+      };
+  
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/score', true); // Passe den Endpunkt "/ergebnis" entsprechend an
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            console.log('Score erfolgreich an den Server gesendet.');
+          } else {
+            console.error('Fehler beim Senden des Scores an den Server.');
+          }
+        }
+      };
+      xhr.send(JSON.stringify(data));
+    }
+  
     function displayScore() {
-      var scoreElement = document.getElementById("score");
+      var scoreElement = document.getElementById('score');
       scoreElement.innerText = score;
     }
-
+  
     function nextQuestion() {
       currentQuestionIndex++;
-
+  
       if (currentQuestionIndex >= questions.length) {
-        alert("Das Quiz ist beendet. Dein Endergebnis: " + score + " von " + questions.length);
+        alert('Das Quiz ist beendet. Dein Endergebnis: ' + score + ' von ' + questions.length);
+        sendScoreToServer(); // Sende den Score an den Server
         currentQuestionIndex = 0;
         score = 0;
       }
-
+  
       displayQuestion();
     }
-
+  
     function goToStartPage() {
       currentQuestionIndex = 0;
       score = 0;
       displayQuestion();
     }
-
+  
     function goBack() {
       currentQuestionIndex--;
-
+  
       if (currentQuestionIndex < 0) {
         currentQuestionIndex = questions.length - 1;
       }
-
+  
       displayQuestion();
     }
-
+  
     function shuffleQuestions() {
       questions = shuffleArray(questions);
       displayQuestion();
     }
-
+  
     function shuffleArray(array) {
       var currentIndex = array.length,
         randomIndex;
-
+  
       while (currentIndex != 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
-
-        [array[currentIndex], array[randomIndex]] = [
-          array[randomIndex],
-          array[currentIndex]
-        ];
+  
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
       }
-
+  
       return array;
     }
-
+  
     function displayPopup(popupType) {
       var popup;
-
-      if (popupType === "correct") {
-        popup = document.getElementById("correctPopup");
-      } else if (popupType === "wrong") {
-        popup = document.getElementById("wrongPopup");
+  
+      if (popupType === 'correct') {
+        popup = document.getElementById('correctPopup');
+      } else if (popupType === 'wrong') {
+        popup = document.getElementById('wrongPopup');
       }
-
-      popup.style.display = "block";
+  
+      popup.style.display = 'block';
     }
-
+  
     function closePopup() {
-      var correctPopup = document.getElementById("correctPopup");
-      var wrongPopup = document.getElementById("wrongPopup");
-
-      correctPopup.style.display = "none";
-      wrongPopup.style.display = "none";
+      var correctPopup = document.getElementById('correctPopup');
+      var wrongPopup = document.getElementById('wrongPopup');
+  
+      correctPopup.style.display = 'none';
+      wrongPopup.style.display = 'none';
     }
-
-    displayQuestion();
   </script>
+  
 </body>
 </html>
