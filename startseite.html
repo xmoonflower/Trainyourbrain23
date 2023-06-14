@@ -24,6 +24,17 @@
     .profile-name {
       margin-left: auto;
       margin-right: 20px;
+      cursor: pointer;
+    }
+
+    .profile-logout {
+      margin-left: 20px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     .main-content {
@@ -117,21 +128,20 @@
   <header>
     <div class="burger-menu" onclick="toggleMenu()">&#9776;</div>
     <h1>Train your brain</h1>
-    <div class="profile-name">Profilname</div>
+    <div class="profile-name"></div>
   </header>
 
   <div class="main-content">
     <h2>Willkommen auf der Startseite!</h2>
     <button class="quiz-button" onclick="showQuizStart()">Enter Quiz</button>
-    <button class="quiz-button" onclick="window.location.href='/make-quiz'">Make Quiz</button>
     <button class="quiz-button" onclick="showConfirmPopup()">Play Quiz</button>
   </div>
 
   <div class="menu">
-    <a href="http://www.localhost:7799/play1">Linux</a>
-    <a href="quizplayaws.html">AWS Quiz</a>
-    <a href="/profile">Profilseite</a>
-    <a href="/all-questions">All Questions</a>
+    <a href="/play1">Linux</a>
+    <a href="/play">AWS Quiz</a>
+    <a href="/make-quiz">Make Quiz</a>
+    <a href="/frageliste">All Questions</a>
     <a href="/scoreboard">Scoreboard</a>
   </div>
 
@@ -154,6 +164,37 @@
   </div>
 
   <script>
+    // Erhalte das Profilnamen-Element
+    const profileNameElement = document.querySelector('.profile-name');
+
+    // Überprüfe, ob das `username`-Cookie vorhanden ist
+    if (document.cookie.includes('username')) {
+      // Extrahiere den Wert des `username`-Cookies
+      const username = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('username='))
+        .split('=')[1];
+
+      // Setze den Profilnamen im HTML-Element
+      profileNameElement.textContent = username;
+
+      // Füge den Klick-Eventhandler hinzu
+      profileNameElement.innerHTML += `
+        <button class="profile-logout" onclick="logout()">Logout</button>
+      `;
+    } else {
+      // Wenn das `username`-Cookie nicht vorhanden ist, zeige eine Standardnachricht an
+      profileNameElement.textContent = 'Unbekannter Benutzer';
+    }
+
+    function logout() {
+      // Lösche das `username`-Cookie
+      document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+      // Leite zur Seite /registration weiter
+      window.location.href = '/registration';
+    }
+
     function toggleMenu() {
       const menu = document.querySelector('.menu');
       menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
@@ -175,24 +216,22 @@
         popup.style.display = 'none';
       });
     }
+     // Funktion für den Start des Linux-Quiz
+  function startQuiz1() {
+    // Weiterleitung zur "/play1" URL
+    window.location.href = "/play1";
+  }
 
-    function startQuiz() {
-      hidePopup();
-      // Hier kannst du die entsprechende Logik einfügen, um zur Quizseite zu navigieren und das Quiz zu starten
-    }
-
-    function startMyQuiz() {
-      hidePopup();
-      // Füge hier deine Logik ein, um zur Quizseite für dein eigenes Quiz zu navigieren und das Quiz zu starten
-    }
-
-    function showAnswerPopup(correct) {
-      const popup = document.getElementById('answer-popup');
-      const message = document.getElementById('popup-message');
-      message.textContent = correct ? 'Super korrekt!' : 'Oh sorry, aber leider falsch.';
-      popup.style.display = 'block';
-    }
+  // Funktion für den Start des AWS-Quiz
+  function startQuiz2() {
+    // Weiterleitung zur "/play2" URL
+    window.location.href = "/play";
+  }
+  //Funktion für den Start des eigenen Quizzes
+  function startMyQuiz() {
+    // Weiterleitung zur "/play2" URL
+    window.location.href = "/play2";
+  }
   </script>
 </body>
 </html>
-
