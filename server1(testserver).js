@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 const fs = require('fs');
@@ -282,11 +283,89 @@ function updateScore(username, score) {
     fs.writeFileSync('users.json', JSON.stringify(userData, null, 2));
   }
 }
+////Scorepunkte my Quiz speichern vom Quiz in die json Datei, damit diese vom Scoreboard gefechted werden kann
+// POST-Anfrage zum Speichern des Benutzernamens und der Punktzahl
+app.post('/score-myquiz', (req, res) => {
+  const { username, score } = req.body;
 
-  // Start the server
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+  // Lese die vorhandenen Daten aus der Datei
+  let existingData = [];
+  try {
+    const fileData = fs.readFileSync('Punkte-myquiz.json', 'utf8');
+    existingData = JSON.parse(fileData);
+  } catch (error) {
+    console.error('Fehler beim Lesen der Datei: ' + error);
+  }
+
+  // Füge den neuen Datensatz hinzu
+  existingData.push({ username, score });
+
+  // Speichere die aktualisierten Daten in der Datei
+  try {
+    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(existingData, null, 2));
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Fehler beim Schreiben der Datei: ' + error);
+    res.sendStatus(500);
+  }
+});
+
+// Funktion zum Aktualisieren des Scores
+function updateScore(username, score) {
+  const userData = loadUserData();
+
+  const user = userData.find(user => user.username === username);
+  if (user) {
+    user.score = score;
+    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(userData, null, 2));
+  }
+}
+
+///////////////////////////Scoreboard my Quiz
+
+app.get('/score-myquiz', (req, res) => {
+  const filePath = path.join(__dirname, 'Punkte-myquiz.json');
+  res.sendFile(filePath);
 });
 
 
+// Endpoint to update scores von my Quiz 
+app.post('/score-myquiz', (req, res) => {
+  // Read the JSON file
+  fs.readFile('Punkte-myquiz.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error reading JSON file');
+      return;
+    }
 
+    try {
+      const scores = JSON.parse(data);
+      scores.forEach(score => {
+        updateScore(score.username, score.score);
+      });
+      res.send('Scores updated successfully');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating scores');
+    }
+  });
+});
+
+//////////////Scoreboard online
+
+app.get('/scoreboard', (req, res) => {
+  const filePath = path.join(__dirname, 'scoreboard.html');
+  res.sendFile(filePath);
+});
+
+app.get('/scoreboard-aws', (req, res) => {
+  const filePath = path.join(__dirname, 'scoreboard-aws.html');
+  res.sendFile(filePath);
+});
+
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
