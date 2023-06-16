@@ -5,6 +5,10 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 
+/////////////Module
+
+//////////////Registration
+
 // Middleware for JSON data processing
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -40,6 +44,8 @@ app.post('/register', (req, res) => {
   res.json({ message: 'Registration successful' });
 });
 
+/////////////////Anmeldung
+
 // POST request for login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -51,17 +57,50 @@ app.post('/login', (req, res) => {
 
   // Validate user credentials
   if (validateUserCredentials(username, password)) {
-    // Set the username cookie
-    res.cookie('username', username);
     res.json({ message: 'Login successful' });
   } else {
     res.status(401).json({ error: 'Invalid credentials' });
   }
 });
 
+// Check if a user already exists
+function userExists(username) {
+  const userData = loadUserData();
+
+  return userData.some(user => user.username === username);
+}
+
+// Save a new user to the users.json file
+function saveUser(user) {
+  const userData = loadUserData();
+
+  userData.push(user);
+  fs.writeFileSync('users.json', JSON.stringify(userData, null, 2));
+}
+
+// Load user data from the users.json file
+function loadUserData() {
+  if (!fs.existsSync('users.json')) {
+    return [];
+  }
+
+  const userData = fs.readFileSync('users.json', 'utf8');
+
+  return JSON.parse(userData);
+}
+
+// Validate user credentials
+function validateUserCredentials(username, password) {
+  const userData = loadUserData();
+
+  return userData.some(user => user.username === username && user.password === password);
+}
+
+//////////////////////// Startseite mit Usercookie
+
 // Serve startseite
 app.get('/startseite', (req, res) => {
-  const username = req.cookies.username; // Retrieve the username cookie
+  const username = req.cookies.username; // Abrufen des Benutzernamen-Cookies
 
   if (!username) {
     res.redirect('/registration');
@@ -75,176 +114,384 @@ app.post('/logout', (req, res) => {
   // Clear the username cookie
   res.clearCookie('username');
 
-  // Redirect to the registration page
-  res.redirect('/registration');
+  res.json({ message: 'Logout successful' });
 });
 
-// POST request for adding a quiz question
+// Set the username cookie upon successful login
+app.post('/login', (req, res) => {
+  const { username } = req.body;
+
+  // Set the username cookie
+  res.cookie('username', username);
+
+  res.json({ message: 'Login successful' });
+});
+
+// POST request for logout
+app.post('/logout', (req, res) => {
+    // Clear the username cookie
+    res.clearCookie('username');
+  
+    // Redirect to the registration page
+    res.redirect('/registration');
+  });
+////////////////////////////////////////////////////////////make Quiz
+  // POST-Anfrage für das Hinzufügen einer Quizfrage
 app.post('/frage-hinzufuegen', (req, res) => {
   const quizData = req.body;
 
-  // Read the existing questions from the file
+  // Lese die vorhandenen Fragen aus der Datei
   let existingData = [];
   try {
     const fileData = fs.readFileSync('fragen.json', 'utf8');
     existingData = JSON.parse(fileData);
   } catch (error) {
-    console.error('Error reading file: ' + error);
+    console.error('Fehler beim Lesen der Datei: ' + error);
   }
 
-  // Add the new quiz question to the existing questions
-  existingData.push(quizData);
+  // Generiere eine eindeutige ID für die neue Quizfrage
+  const newId = existingData.length.toString();
 
-  // Write the questions back to the file
+  // Erstelle ein neues Frageobjekt im gewünschten Format
+  const newQuestion = {
+    id: newId,
+    question: quizData.question,
+    answer: {
+      A: quizData.answer.A,
+      B: quizData.answer.B,
+      C: quizData.answer.C,
+      D: quizData.answer.D
+    },
+    correct_answer: quizData.correct_answer
+  };
+
+  // Füge die neue Quizfrage zu den vorhandenen Fragen hinzu
+  existingData.push(newQuestion);
+
+  // Schreibe die Fragen zurück in die Datei
   try {
     fs.writeFileSync('fragen.json', JSON.stringify(existingData));
-    console.log('Quiz question saved successfully.');
-    // Send a success response
+    console.log('Die Quizfrage wurde erfolgreich gespeichert.');
+    // Sende eine Erfolgsantwort zurück
     res.sendStatus(200);
   } catch (error) {
-    console.error('Error writing file: ' + error);
-    // Send an error response
+    console.error('Fehler beim Schreiben der Datei: ' + error);
+    // Sende eine Fehlerantwort zurück
     res.sendStatus(500);
   }
 });
 
-// GET request for retrieving the make-quiz.html
-app.get('/make-quiz', (req, res) => {
-  fs.readFile('make-quiz.html', 'utf8', (err, data) => {
-    if (err) {
-        console.error('Error reading file: ' + err);
-        res.sendStatus(500);
-      } else {
-        res.send(data);
-      }
-    });
-  });
+/////////////////////////////////////////////////////////////////////7777    
   
-  // GET request for retrieving quiz questions
-  app.get('/fragen', (req, res) => {
-    // Read the quiz questions from the file
-    fs.readFile('fragen.json', 'utf8', (err, data) => {
+  // GET-Anfrage für das Abrufen der make-quiz.html
+  app.get('/make-quiz', (req, res) => {
+      fs.readFile('make-quiz.html', 'utf8', (err, data) => {
+        if (err) {
+          console.error('Fehler beim Lesen der Datei: ' + err);
+          res.sendStatus(500);
+        } else {
+          res.send(data);
+        }
+      });
+    });
+
+////////////////////////// AWS Quiz    
+  
+  app.use(express.static('public'));
+  
+  app.get('/questions', (req, res) => {
+    fs.readFile('aws-question.json', 'utf8', (err, data) => {
       if (err) {
-        console.error('Error reading file: ' + err);
-        res.sendStatus(500);
+        console.error(err);
+        res.status(500).send('Fehler beim Lesen der Fragen.');
       } else {
         const questions = JSON.parse(data);
         res.json(questions);
       }
     });
   });
-
+  
+  app.get('/play', (req, res) => {
+    const filePath = path.join(__dirname, 'quizplayaws.html');
+    res.sendFile(filePath);
+  });
+  
+///////////////Speicherapi Linuxfragen
   app.use(express.static('public'));
-
-app.get('/questions', (req, res) => {
-  fs.readFile('aws-question.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Fehler beim Lesen der Fragen.');
-    } else {
-      const questions = JSON.parse(data);
-      res.json(questions);
-    }
+  
+  app.get('/fragen-linux', (req, res) => {
+    fs.readFile('linux.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Fehler beim Lesen der Fragen.');
+      } else {
+        const questions = JSON.parse(data);
+        res.json(questions);
+      }
+    });
   });
+  //////////////////////////////// Linux
+  app.get('/play1', (req, res) => {
+    const filePath = path.join(__dirname, 'quizplaylinux.html');
+    res.sendFile(filePath);
+  });
+  
+  app.use(express.static('public'));
+  
+  app.get('/frage', (req, res) => {
+    fs.readFile('fragen.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Fehler beim Lesen der Fragen.');
+      } else {
+        const questions = JSON.parse(data);
+        res.json(questions);
+      }
+    });
+  });
+  ////////////////////////////////////////////////// play my Quiz
+  
+  app.get('/play2', (req, res) => {
+    const filePath = path.join(__dirname, 'playmyquiz.html');
+    res.sendFile(filePath);
+  });
+
+////////////////////////////////////////////////////7
+
+////Scorepunkte my Quiz speichern vom Quiz in die json Datei, damit diese vom Scoreboard gefechted werden kann
+// POST-Anfrage zum Speichern des Benutzernamens und der Punktzahl
+app.post('/score-myquiz', (req, res) => {
+  const { username, score } = req.body;
+
+  // Lese die vorhandenen Daten aus der Datei
+  let existingData = [];
+  try {
+    const fileData = fs.readFileSync('Punkte-myquiz.json', 'utf8');
+    existingData = JSON.parse(fileData);
+  } catch (error) {
+    console.error('Fehler beim Lesen der Datei: ' + error);
+  }
+
+  // Füge den neuen Datensatz hinzu
+  existingData.push({ username, score });
+
+  // Speichere die aktualisierten Daten in der Datei
+  try {
+    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(existingData, null, 2));
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Fehler beim Schreiben der Datei: ' + error);
+    res.sendStatus(500);
+  }
 });
 
-app.get('/play', (req, res) => {
-  const filePath = path.join(__dirname, 'quizplayaws.html');
+// Funktion zum Aktualisieren des Scores
+function updateScore(username, score) {
+  const userData = loadUserData();
+
+  const user = userData.find(user => user.username === username);
+  if (user) {
+    user.score = score;
+    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(userData, null, 2));
+  }
+}
+
+///////////////////////////Scoreboardabfrage für Scoreboard my Quiz
+
+app.get('/score-myquiz', (req, res) => {
+  const filePath = path.join(__dirname, 'Punkte-myquiz.json');
   res.sendFile(filePath);
 });
 
-app.use(express.static('public'));
 
-app.get('/fragen-linux', (req, res) => {
-  fs.readFile('linux.json', 'utf8', (err, data) => {
+// Endpoint to update scores von my Quiz 
+app.post('/score-myquiz', (req, res) => {
+  // Read the JSON file
+  fs.readFile('Punkte-myquiz.json', 'utf8', (err, data) => {
     if (err) {
       console.error(err);
-      res.status(500).send('Fehler beim Lesen der Fragen.');
-    } else {
-      const questions = JSON.parse(data);
-      res.json(questions);
+      res.status(500).send('Error reading JSON file');
+      return;
+    }
+
+    try {
+      const scores = JSON.parse(data);
+      scores.forEach(score => {
+        updateScore(score.username, score.score);
+      });
+      res.send('Scores updated successfully');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating scores');
     }
   });
 });
+/////////////////////////// Ende Scoreboard my Quiz
 
-app.get('/play1', (req, res) => {
-  const filePath = path.join(__dirname, 'quizplaylinux.html');
+///////////////////////////////// Scoreboard AWS
+
+////Scorepunkte my Quiz speichern vom Quiz in die json Datei, damit diese vom Scoreboard gefechted werden kann
+// POST-Anfrage zum Speichern des Benutzernamens und der Punktzahl
+app.post('/score-aws', (req, res) => {
+  const { username, score } = req.body;
+
+  // Lese die vorhandenen Daten aus der Datei
+  let existingData = [];
+  try {
+    const fileData = fs.readFileSync('Punkte-aws.json', 'utf8');
+    existingData = JSON.parse(fileData);
+  } catch (error) {
+    console.error('Fehler beim Lesen der Datei: ' + error);
+  }
+
+  // Füge den neuen Datensatz hinzu
+  existingData.push({ username, score });
+
+  // Speichere die aktualisierten Daten in der Datei
+  try {
+    fs.writeFileSync('Punkte-aws.json', JSON.stringify(existingData, null, 2));
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Fehler beim Schreiben der Datei: ' + error);
+    res.sendStatus(500);
+  }
+});
+
+// Funktion zum Aktualisieren des Scores
+function updateScore(username, score) {
+  const userData = loadUserData();
+
+  const user = userData.find(user => user.username === username);
+  if (user) {
+    user.score = score;
+    fs.writeFileSync('Punkte-aws.json', JSON.stringify(userData, null, 2));
+  }
+}
+
+///////////////////////////Scoreboardabfrage für Scoreboard AWS
+
+app.get('/score-aws', (req, res) => {
+  const filePath = path.join(__dirname, 'Punkte-aws.json');
   res.sendFile(filePath);
 });
 
-app.use(express.static('public'));
 
-app.get('/frage', (req, res) => {
-  fs.readFile('fragen.json', 'utf8', (err, data) => {
+// Endpoint to update scores von my Quiz 
+app.post('/score-aws', (req, res) => {
+  // Read the JSON file
+  fs.readFile('Punkte-aws.json', 'utf8', (err, data) => {
     if (err) {
       console.error(err);
-      res.status(500).send('Fehler beim Lesen der Fragen.');
-    } else {
-      const questions = JSON.parse(data);
-      res.json(questions);
+      res.status(500).send('Error reading JSON file');
+      return;
+    }
+
+    try {
+      const scores = JSON.parse(data);
+      scores.forEach(score => {
+        updateScore(score.username, score.score);
+      });
+      res.send('Scores updated successfully');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating scores');
     }
   });
 });
 
-app.get('/play2', (req, res) => {
-  const filePath = path.join(__dirname, 'playmyquiz.html');
+/////////////////////////////////// Ende AWS Board
+
+///////////////////////////////// Scoreboard Linux
+
+////Scorepunkte my Quiz speichern vom Quiz in die json Datei, damit diese vom Scoreboard gefechted werden kann
+// POST-Anfrage zum Speichern des Benutzernamens und der Punktzahl
+app.post('/score-linux', (req, res) => {
+  const { username, score } = req.body;
+
+  // Lese die vorhandenen Daten aus der Datei
+  let existingData = [];
+  try {
+    const fileData = fs.readFileSync('Punkte-linux.json', 'utf8');
+    existingData = JSON.parse(fileData);
+  } catch (error) {
+    console.error('Fehler beim Lesen der Datei: ' + error);
+  }
+
+  // Füge den neuen Datensatz hinzu
+  existingData.push({ username, score });
+
+  // Speichere die aktualisierten Daten in der Datei
+  try {
+    fs.writeFileSync('Punkte-linux.json', JSON.stringify(existingData, null, 2));
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Fehler beim Schreiben der Datei: ' + error);
+    res.sendStatus(500);
+  }
+});
+
+// Funktion zum Aktualisieren des Scores
+function updateScore(username, score) {
+  const userData = loadUserData();
+
+  const user = userData.find(user => user.username === username);
+  if (user) {
+    user.score = score;
+    fs.writeFileSync('Punkte-linux.json', JSON.stringify(userData, null, 2));
+  }
+}
+
+///////////////////////////Scoreboardabfrage für Scoreboard Linux
+
+app.get('/score-linux', (req, res) => {
+  const filePath = path.join(__dirname, 'Punkte-linux.json');
   res.sendFile(filePath);
 });
-  
-  // Check if a user with the given username already exists
-  function userExists(username) {
-    // Read the existing users from the file
-    let existingUsers = [];
-    try {
-      const fileData = fs.readFileSync('users.json', 'utf8');
-      existingUsers = JSON.parse(fileData);
-    } catch (error) {
-      console.error('Error reading file: ' + error);
+
+
+// Endpoint to update scores von my Quiz 
+app.post('/score-linux', (req, res) => {
+  // Read the JSON file
+  fs.readFile('Punkte-linux.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error reading JSON file');
+      return;
     }
-  
-    // Check if the username exists in the existing users
-    return existingUsers.some((user) => user.username === username);
-  }
-  
-  // Save a new user to the users.json file
-  function saveUser(newUser) {
-    // Read the existing users from the file
-    let existingUsers = [];
+
     try {
-      const fileData = fs.readFileSync('users.json', 'utf8');
-      existingUsers = JSON.parse(fileData);
+      const scores = JSON.parse(data);
+      scores.forEach(score => {
+        updateScore(score.username, score.score);
+      });
+      res.send('Scores updated successfully');
     } catch (error) {
-      console.error('Error reading file: ' + error);
+      console.error(error);
+      res.status(500).send('Error updating scores');
     }
-  
-    // Add the new user to the existing users
-    existingUsers.push(newUser);
-  
-    // Write the users back to the file
-    try {
-      fs.writeFileSync('users.json', JSON.stringify(existingUsers));
-      console.log('User saved successfully.');
-    } catch (error) {
-      console.error('Error writing file: ' + error);
-    }
-  }
-  
-  // Validate user credentials
-  function validateUserCredentials(username, password) {
-    // Read the existing users from the file
-    let existingUsers = [];
-    try {
-      const fileData = fs.readFileSync('users.json', 'utf8');
-      existingUsers = JSON.parse(fileData);
-    } catch (error) {
-      console.error('Error reading file: ' + error);
-    }
-  
-    // Check if the username and password match any existing user
-    return existingUsers.some((user) => user.username === username && user.password === password);
-  }
-  
-  // Start the server
-  app.listen(7799, () => {
-    console.log('Server started on port 7799');
   });
+});
+
+/////////////////////////////////// Ende AWS Linux
+
+//////////////Scoreboard online
+
+app.get('/scoreboard', (req, res) => {
+  const filePath = path.join(__dirname, 'scoreboard.html');
+  res.sendFile(filePath);
+});
+
+app.get('/scoreboard-aws', (req, res) => {
+  const filePath = path.join(__dirname, 'scoreboard-aws.html');
+  res.sendFile(filePath);
+});
+
+app.get('/scoreboard-linux', (req, res) => {
+  const filePath = path.join(__dirname, 'scoreboard-linux.html');
+  res.sendFile(filePath);
+});
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
