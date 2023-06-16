@@ -148,11 +148,23 @@
     </div>
 
     <div class="buttons">
-      <button onclick="goToStartPage()">Startseite</button>
+      <button onclick="goToStartPage()">Quiz zurücksetzen</button>
       <button onclick="goBack()">Zurück</button>
       <button onclick="shuffleQuestions()">Fragen mischen</button>
     </div>
   </div>
+
+
+  <!-- Neuer Button für die Startseite -->
+  <div class="buttons">
+    <button onclick="window.location.href='/startseite'">Startseite</button>
+  </div>
+
+ <!-- Neuer Button für das Scoreboard -->
+ <div class="buttons">
+  <button onclick="window.location.href='/scoreboard-aws'">Scoreboard</button>
+</div>
+
 
   <div class="popup" id="correctPopup">
     <div class="popup-content">
@@ -170,7 +182,6 @@
       <button class="popup-button" onclick="closePopup()">OK</button>
     </div>
   </div>
-
   <script>
     // Erhalte das Profilnamen-Element
     const profileNameElement = document.querySelector('.profile-name');
@@ -229,8 +240,6 @@
       xhr.send();
     }
   
-    getQuestions();
-  
     function checkAnswer() {
       var selectedOption = document.querySelector('input[name="answer"]:checked');
   
@@ -255,44 +264,9 @@
       }
     }
   
-    function sendScoreToServer() {
-      // Erstelle ein Objekt mit den Daten, die du senden möchtest
-      var data = {
-        username: username, // Benutzername
-        score: score // Score
-      };
-  
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/score', true); // Passe den Endpunkt "/ergebnis" entsprechend an
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            console.log('Score erfolgreich an den Server gesendet.');
-          } else {
-            console.error('Fehler beim Senden des Scores an den Server.');
-          }
-        }
-      };
-      xhr.send(JSON.stringify(data));
-    }
-  
     function displayScore() {
       var scoreElement = document.getElementById('score');
-      scoreElement.innerText = score;
-    }
-  
-    function nextQuestion() {
-      currentQuestionIndex++;
-  
-      if (currentQuestionIndex >= questions.length) {
-        alert('Das Quiz ist beendet. Dein Endergebnis: ' + score + ' von ' + questions.length);
-        sendScoreToServer(); // Sende den Score an den Server
-        currentQuestionIndex = 0;
-        score = 0;
-      }
-  
-      displayQuestion();
+      scoreElement.innerText = 'Punktestand: ' + score;
     }
   
     function goToStartPage() {
@@ -349,7 +323,52 @@
       correctPopup.style.display = 'none';
       wrongPopup.style.display = 'none';
     }
-  </script>
   
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex >= questions.length) {
+        // If the currentQuestionIndex exceeds the length of questions array, display the final score.
+        sendScore(); // Send the score to the server
+        alert('Quiz is finished. Your final score is: ' + score);
+        // You may choose to redirect to another page here or reset the game.
+      } else {
+        displayQuestion();
+      }
+    }
+
+  // Rufe die Fragen vom Server ab, sobald die Seite geladen ist
+    window.addEventListener('load', function () {
+      getQuestions();
+    });
+    
+    // Neue Funktion zum Senden des Punktestands als JSON an die API
+    function sendScore() {
+      const scoreData = {
+        username: profileNameElement.textContent,
+        score: score
+      };
+  
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/score-myquiz', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log('Score sent successfully');
+        }
+      };
+      xhr.send(JSON.stringify(scoreData));
+    }
+
+
+  function closePopup() {
+  var correctPopup = document.getElementById('correctPopup');
+  var wrongPopup = document.getElementById('wrongPopup');
+
+  correctPopup.style.display = 'none';
+  wrongPopup.style.display = 'none';
+
+  nextQuestion(); // Rufe die nächste Frage auf, nachdem das Popup-Fenster geschlossen wurde
+}
+</script>
 </body>
 </html>
