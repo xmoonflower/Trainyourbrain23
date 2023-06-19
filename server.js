@@ -194,6 +194,55 @@ app.post('/frage-hinzufuegen', (req, res) => {
         }
       });
     });
+///////////////////////////////////////Löschen Quizfrage
+// Middleware for JSON data processing
+app.use(express.json());
+
+// DELETE route for deleting a question
+app.delete('/delete-question/:questionId', (req, res) => {
+  const questionId = req.params.questionId;
+
+  // Read the questions from the JSON file
+  fs.readFile('fragen.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Fehler beim Lesen der Datei: ' + err);
+      return res.sendStatus(500);
+    }
+
+    try {
+      // Parse the JSON data
+      const questions = JSON.parse(data);
+
+      // Find the question with the given ID
+      const questionIndex = questions.findIndex(question => question.id === questionId);
+
+      // If the question exists, remove it from the array
+      if (questionIndex !== -1) {
+        questions.splice(questionIndex, 1);
+
+        // Write the updated questions back to the file
+        fs.writeFile('fragen.json', JSON.stringify(questions, null, 2), err => {
+          if (err) {
+            console.error('Fehler beim Schreiben der Datei: ' + err);
+            return res.sendStatus(500);
+          }
+
+          // Question successfully deleted
+          res.sendStatus(200);
+        });
+      } else {
+        // Question not found
+        res.sendStatus(404);
+      }
+    } catch (error) {
+      console.error('Fehler beim Parsen der JSON-Daten: ' + error);
+      res.sendStatus(500);
+    }
+  });
+});
+
+////////////////////////////////////////////////////////
+
 
 ////////////////////////// AWS Quiz    
   
@@ -491,7 +540,16 @@ app.get('/scoreboard-linux', (req, res) => {
   res.sendFile(filePath);
 });
 
+/////////////////////// AllQuestion Funktion /////
+
+app.get('/frageliste', (req, res) => {
+  const filePath = path.join(__dirname, 'All-questions.html');
+  res.sendFile(filePath);
+});
+
 // Start the server
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
+
+
