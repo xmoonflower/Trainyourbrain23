@@ -1,113 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Train your brain - All Questions</title>
+  <title>Meine Fragen</title>
   <style>
-    /* CSS-Styling für die All Questions-Seite */
-    body {
-      font-family: Arial, sans-serif;
+    table {
+      border-collapse: collapse;
+      width: 100%;
     }
 
-    header {
-      background-color: #333;
-      color: #fff;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .main-content {
-      text-align: center;
-      margin-top: 50px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
       text-align: left;
-    }
-
-    .question {
-      margin-bottom: 20px;
-    }
-
-    .easy {
-      background-color: green;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-
-    .medium {
-      background-color: yellow;
-      color: #000;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-
-    .hard {
-      background-color: red;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-    }
-
-    .buttons {
-      margin-top: 20px;
-    }
-
-    button {
-      margin-right: 10px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Train your brain - All Questions</h1>
-  </header>
+  <h2>AWS Fragen</h2>
+  <table id="aws-tabelle">
+    <thead>
+      <tr>
+        <th>Fragen</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-  <div class="main-content">
-    <ul>
-      <li class="question">
-        <span class="easy">Easy</span>
-        Frage 1: Wie lautet die Hauptstadt von Frankreich?
-      </li>
-      <li class="question">
-        <span class="medium">Medium</span>
-        Frage 2: Was ist die Wurzel von 64?
-      </li>
-      <li class="question">
-        <span class="hard">Hard</span>
-        Frage 3: In welchem Jahr wurde der Eiffelturm erbaut?
-      </li>
-    </ul>
+  <h2>Linux Fragen</h2>
+  <table id="linux-tabelle">
+    <thead>
+      <tr>
+        <th>Fragen</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-    <div class="buttons">
-      <button onclick="goToStartPage()">Startseite</button>
-      <button onclick="goBack()">Zurück</button>
-    </div>
-  </div>
+  <h2>eigene Fragen</h2>
+  <table id="fragen-tabelle">
+    <thead>
+      <tr>
+        <th>Fragen</th>
+        <th>Aktion</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
-    function goToStartPage() {
-      // Funktion zum Wechseln zur Startseite aufrufen
-      // Hier kannst du den Code einfügen, um zur Startseite zu navigieren
+    class JSONAdapter {
+      static formatQuestion(question) {
+        const formattedQuestion = `Frage: ${question.question}<br>`;
+        const formattedAnswers = `Antworten:<br>
+          A: ${question.answer.A}<br>
+          B: ${question.answer.B}<br>
+          C: ${question.answer.C}<br>
+          D: ${question.answer.D}<br>`;
+        const formattedCorrectAnswer = `Korrekte Antwort: ${question.correct_answer}<br><br>`;
+        return formattedQuestion + formattedAnswers + formattedCorrectAnswer;
+      }
     }
 
-    function goBack() {
-      // Funktion zum Zurückgehen aufrufen
-      // Hier kannst du den Code einfügen, um zur vorherigen Seite zurückzugehen
+    // Funktion zum Löschen einer Frage
+    function deleteQuestion(questionId) {
+      fetch(`/delete-question/${questionId}`, {
+        method: 'DELETE'
+      })
+        .then(response => {
+          if (response.ok) {
+            // Frage erfolgreich gelöscht, aktualisiere die Tabelle
+            location.reload();
+          } else {
+            // Fehler beim Löschen der Frage
+            alert('Beim Löschen der Frage ist ein Fehler aufgetreten.');
+          }
+        })
+        .catch(error => {
+          console.error('Fehler beim Löschen der Frage:', error);
+          alert('Beim Löschen der Frage ist ein Fehler aufgetreten.');
+        });
     }
+
+    // Daten aus awsquiz.json abrufen
+    fetch('/questions')
+      .then(response => response.json())
+      .then(data => {
+        const awsTabelle = document.getElementById('aws-tabelle');
+
+        // Fragen in die Tabelle einfügen
+        data.forEach(frage => {
+          const row = document.createElement('tr');
+          const frageCell = document.createElement('td');
+          const aktionCell = document.createElement('td');
+
+          const formattedQuestion = JSONAdapter.formatQuestion(frage);
+          frageCell.innerHTML = formattedQuestion;
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Löschen';
+          deleteButton.addEventListener('click', () => deleteQuestion(frage.id));
+          aktionCell.appendChild(deleteButton);
+
+          row.appendChild(frageCell);
+          row.appendChild(aktionCell);
+          awsTabelle.querySelector('tbody').appendChild(row);
+        });
+      });
+
+    // Daten aus linux.json abrufen
+    fetch('fragen-linux')
+      .then(response => response.json())
+      .then(data => {
+        const linuxTabelle = document.getElementById('linux-tabelle');
+
+        // Fragen in die Tabelle einfügen
+        data.forEach(frage => {
+          const row = document.createElement('tr');
+          const frageCell = document.createElement('td');
+          const aktionCell = document.createElement('td');
+
+          const formattedQuestion = JSONAdapter.formatQuestion(frage);
+          frageCell.innerHTML = formattedQuestion;
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Löschen';
+          deleteButton.addEventListener('click', () => deleteQuestion(frage.id));
+          aktionCell.appendChild(deleteButton);
+
+          row.appendChild(frageCell);
+          row.appendChild(aktionCell);
+          linuxTabelle.querySelector('tbody').appendChild(row);
+        });
+      });
+
+    fetch('frage')
+      .then(response => response.json())
+      .then(data => {
+        const fragenTabelle = document.getElementById('fragen-tabelle');
+
+        data.forEach(frage => {
+          const row = document.createElement('tr');
+          const frageCell = document.createElement('td');
+          const aktionCell = document.createElement('td');
+
+          const formattedQuestion = JSONAdapter.formatQuestion(frage);
+          frageCell.innerHTML = formattedQuestion;
+
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Löschen';
+          deleteButton.addEventListener('click', () => deleteQuestion(frage.id));
+          aktionCell.appendChild(deleteButton);
+
+          row.appendChild(frageCell);
+          row.appendChild(aktionCell);
+          fragenTabelle.querySelector('tbody').appendChild(row);
+        });
+      });
   </script>
 </body>
 </html>
+
+
