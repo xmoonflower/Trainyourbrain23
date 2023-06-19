@@ -17,6 +17,11 @@
       align-items: center;
     }
 
+    .profile-name {
+      margin-left: auto;
+      margin-right: 20px;
+      cursor: pointer;
+    }
     .main-content {
       text-align: center;
       margin-top: 50px;
@@ -53,6 +58,7 @@
 <body>
   <header>
     <h1>Train your brain - Make Quiz</h1>
+    <div class="profile-name"></div>
   </header>
 
   <div class="main-content">
@@ -75,15 +81,29 @@
       <label for="correctOption">Richtige Option:</label>
       <input type="text" id="correctOption" name="correctOption" maxlength="1" required>
 
-  <button type="submit">Quizfrage erstellen</button>
-  <button onclick="window.location.href = '/startseite'">Startseite</button>
-
-
-  <button onclick="window.location.href = '/play2'">Play Quiz</button>
+      <button type="submit">Quizfrage erstellen</button>
+      <button onclick="window.location.href = '/startseite'">Startseite</button>
+      <button onclick="window.location.href = '/play2'">Play Quiz</button>
+      <button id="shareButton">Teilen</button>
     </form>
   </div>
 
   <script>
+    // Erhalte das Profilnamen-Element
+    const profileNameElement = document.querySelector('.profile-name');
+
+    // Überprüfe, ob das `username`-Cookie vorhanden ist
+    if (document.cookie.includes('username')) {
+      // Extrahiere den Wert des `username`-Cookies
+      const username = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('username='))
+        .split('=')[1];
+
+      // Setze den Profilnamen im HTML-Element
+      profileNameElement.textContent = username;
+    }
+
     document.getElementById('quizForm').addEventListener('submit', function(event) {
       event.preventDefault(); // Verhindert das Neuladen der Seite nach dem Absenden des Formulars
 
@@ -94,9 +114,17 @@
       var option3 = document.getElementById('option3').value;
       var option4 = document.getElementById('option4').value;
       var correctOption = document.getElementById('correctOption').value.toUpperCase();
-      
 
-      // Erstelle ein JSON-Objekt mit den eingegebenen Werten
+      // Extrahiere den Wert des `username`-Cookies
+      const usernameCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('username='))
+        .split('=')[1];
+
+      // Entferne eventuelle Anführungszeichen aus dem Cookie-Wert
+      const username = usernameCookie.replace(/"/g, '');
+
+      // Erstelle ein JSON-Objekt mit den eingegebenen Werten und dem Benutzernamen
       var quizData = {
         question: question,
         answer: {
@@ -105,13 +133,11 @@
           C: option3,
           D: option4
         },
-        correct_answer: [correctOption]
-
+        correct_answer: [correctOption],
+        username: username
       };
 
-
-
-      // Daten werden an den Server gesendet///////////////////////////////////////////////////////
+      // Daten werden an den Server gesendet
       fetch('/frage-hinzufuegen', {
         method: 'POST',
         headers: {
@@ -135,6 +161,31 @@
           // Zeige eine Fehlermeldung an
           alert('Beim Speichern der Quizfrage ist ein Fehler aufgetreten.');
         });
+    });
+
+    document.getElementById('shareButton').addEventListener('click', function() {
+      // Pfad zur Fragen-Datei
+      var questionsFile = 'frage';
+
+      // Erstelle eine URL zum Teilen der Datei
+      var shareURL = window.location.href.split('/').slice(0, -1).join('/') + '/' + questionsFile;
+
+      // Erstelle ein Teilen-Dialogfeld
+      if (navigator.share) {
+        navigator.share({
+          title: 'Fragen teilen',
+          url: shareURL
+        })
+          .then(function() {
+            console.log('Datei erfolgreich geteilt.');
+          })
+          .catch(function(error) {
+            console.log('Fehler beim Teilen der Datei:', error);
+          });
+      } else {
+        console.log('Der Teilen-Dialog wird von diesem Gerät nicht unterstützt.');
+        // Zeige alternativen Code für das Teilen an, z.B. einen Link oder eine Nachricht an den Benutzer.
+      }
     });
   </script>
 </body>
