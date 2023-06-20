@@ -2,94 +2,32 @@
 <html>
 <head>
   <title>Train your brain - Make Quiz</title>
- 
-  <style>
-    /* CSS-Styling für die Make Quiz-Seite */
-    body {
-      font-family:'Lucida Sans', sans-serif;
-    }
-
-    header {
-      background-color: #333;
-      color: #fff;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      border-radius: 10px;
-      margin: 30px;
-    }
-
-    .profile-name {
-      margin-left: auto;
-      margin-right: 20px;
-      cursor: pointer;
-    }
-    .main-content {
-      text-align: center;
-      margin-top: 50px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-top: 20px;
-    }
-
-    input[type="text"] {
-      width: 300px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #269aae;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
-
 </head>
 <body>
   <header>
     <h1>Train your brain - Make Quiz</h1>
     <div class="profile-name"></div>
   </header>
-
   <div class="main-content">
     <form id="quizForm">
       <label for="question">Frage:</label>
       <input type="text" id="question" name="question" required>
-
       <label for="option1">Option A:</label>
       <input type="text" id="option1" name="option1" required>
-
       <label for="option2">Option B:</label>
       <input type="text" id="option2" name="option2" required>
-
       <label for="option3">Option C:</label>
       <input type="text" id="option3" name="option3" required>
-
       <label for="option4">Option D:</label>
       <input type="text" id="option4" name="option4" required>
-
       <label for="correctOption">Richtige Option:</label>
       <input type="text" id="correctOption" name="correctOption" maxlength="1" required><br>
-
       <button type="submit">Quizfrage erstellen</button>
       <button onclick="window.location.href = '/startseite'">Startseite</button>
       <button onclick="window.location.href = '/play2'">Play Quiz</button>
       <button id="shareButton">Teilen</button>
     </form>
   </div>
-
   <script>
     // Erhalte das Profilnamen-Element
     const profileNameElement = document.querySelector('.profile-name');
@@ -190,5 +128,57 @@
       }
     });
   </script>
+  <style>
+    /* CSS-Styling für die Make Quiz-Seite */
+    body {
+      font-family:'Lucida Sans', sans-serif;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      border-radius: 10px;
+      margin: 30px;
+    }
+
+    .profile-name {
+      margin-left: auto;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    .main-content {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #269aae;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </body>
 </html>

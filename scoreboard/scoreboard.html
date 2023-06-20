@@ -3,8 +3,13 @@
     <title>Quiz Scoreboard</title>
     <style>
       body {
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        font-family: 'Lucida Sans', Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
+
       table {
         border-collapse: collapse;
         width: 100%;
@@ -29,7 +34,7 @@
         font-weight: normal;
       }
     </style>
-    <button onclick="window.location.href = '/startseite'">Startseite</button>
+    <button onclick="goBack()">Zurück</button>
   </head>
   <body>
     <h1>Quiz Scoreboard My Quiz</h1>
