@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>Quiz Scoreboard</title>
+    <style>
+      body {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .top-users {
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+      .user-row {
+        font-weight: normal;
+      }
+    </style>
+    <button onclick="window.location.href = '/startseite'">Startseite</button>
+  </head>
+  <body>
+    <h1>Quiz Scoreboard My Quiz</h1>
+    <p>This is a leaderboard for the top users in our quiz game:</p>
+    <div class="top-users">Top Users:</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard"></tbody>
+    </table>
+  <script>
+    // Funktion zum Abrufen der JSON-Daten und Aktualisieren des Scoreboards
+    function updateScoreboard() {
+      fetch("/score-myquiz")
+        .then(response => response.json())
+        .then(data => {
+          // Sortieren der Benutzer nach Punktzahl in absteigender Reihenfolge
+          data.sort((a, b) => b.score - a.score);
+
+          // Begrenzen der Anzahl der anzuzeigenden Benutzer auf 10
+          var topUsers = data.slice(0, 10);
+
+          // Löschen des vorherigen Scoreboards
+          var leaderboard = document.getElementById("leaderboard");
+          leaderboard.innerHTML = "";
+
+          // Hinzufügen der Benutzer zum Scoreboard
+          topUsers.forEach(user => {
+            var row = document.createElement("tr");
+            row.classList.add("user-row");
+
+            var usernameCell = document.createElement("td");
+            usernameCell.textContent = user.username;
+
+            var scoreCell = document.createElement("td");
+            scoreCell.textContent = user.score;
+
+            row.appendChild(usernameCell);
+            row.appendChild(scoreCell);
+            leaderboard.appendChild(row);
+          });
+        })
+        .catch(error => {
+          console.error("Fehler beim Abrufen der JSON-Daten:", error);
+        });
+    }
+
+    // Aktualisieren des Scoreboards alle 5 Sekunden
+    setInterval(updateScoreboard, 5000);
+  </script>
+</body>
+</html>

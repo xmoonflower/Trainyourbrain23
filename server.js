@@ -15,7 +15,7 @@ app.use(cookieParser());
 
 // Serve the index.html file
 app.get('/registration', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
+  res.sendFile(path.join(__dirname, 'public/login.html'));
 });
 
 // POST request for registration
@@ -75,16 +75,16 @@ function saveUser(user) {
   const userData = loadUserData();
 
   userData.push(user);
-  fs.writeFileSync('users.json', JSON.stringify(userData, null, 2));
+  fs.writeFileSync('data/users.json', JSON.stringify(userData, null, 2));
 }
 
 // Load user data from the users.json file
 function loadUserData() {
-  if (!fs.existsSync('users.json')) {
+  if (!fs.existsSync('data/users.json')) {
     return [];
   }
 
-  const userData = fs.readFileSync('users.json', 'utf8');
+  const userData = fs.readFileSync('data/users.json', 'utf8');
 
   return JSON.parse(userData);
 }
@@ -105,7 +105,7 @@ app.get('/startseite', (req, res) => {
   if (!username) {
     res.redirect('/registration');
   } else {
-    res.sendFile(path.join(__dirname, 'startseite.html'));
+    res.sendFile(path.join(__dirname, 'public/startseite.html'));
   }
 });
 
@@ -143,7 +143,7 @@ app.post('/frage-hinzufuegen', (req, res) => {
   // Lese die vorhandenen Fragen aus der Datei
   let existingData = [];
   try {
-    const fileData = fs.readFileSync('fragen.json', 'utf8');
+    const fileData = fs.readFileSync('data/fragen.json', 'utf8');
     existingData = JSON.parse(fileData);
   } catch (error) {
     console.error('Fehler beim Lesen der Datei: ' + error);
@@ -170,7 +170,7 @@ app.post('/frage-hinzufuegen', (req, res) => {
 
   // Schreibe die Fragen zurück in die Datei
   try {
-    fs.writeFileSync('fragen.json', JSON.stringify(existingData));
+    fs.writeFileSync('data/fragen.json', JSON.stringify(existingData));
     console.log('Die Quizfrage wurde erfolgreich gespeichert.');
     // Sende eine Erfolgsantwort zurück
     res.sendStatus(200);
@@ -185,7 +185,7 @@ app.post('/frage-hinzufuegen', (req, res) => {
   
   // GET-Anfrage für das Abrufen der make-quiz.html
   app.get('/make-quiz', (req, res) => {
-      fs.readFile('make-quiz.html', 'utf8', (err, data) => {
+      fs.readFile('quiz/make-quiz.html', 'utf8', (err, data) => {
         if (err) {
           console.error('Fehler beim Lesen der Datei: ' + err);
           res.sendStatus(500);
@@ -203,7 +203,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
   const questionId = req.params.questionId;
 
   // Read the questions from the JSON file
-  fs.readFile('fragen.json', 'utf8', (err, data) => {
+  fs.readFile('data/fragen.json', 'utf8', (err, data) => {
     if (err) {
       console.error('Fehler beim Lesen der Datei: ' + err);
       return res.sendStatus(500);
@@ -221,7 +221,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
         questions.splice(questionIndex, 1);
 
         // Write the updated questions back to the file
-        fs.writeFile('fragen.json', JSON.stringify(questions, null, 2), err => {
+        fs.writeFile('data/fragen.json', JSON.stringify(questions, null, 2), err => {
           if (err) {
             console.error('Fehler beim Schreiben der Datei: ' + err);
             return res.sendStatus(500);
@@ -249,7 +249,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
   app.use(express.static('public'));
   
   app.get('/questions', (req, res) => {
-    fs.readFile('aws-question.json', 'utf8', (err, data) => {
+    fs.readFile('data/aws.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
         res.status(500).send('Fehler beim Lesen der Fragen.');
@@ -261,7 +261,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
   });
   
   app.get('/play', (req, res) => {
-    const filePath = path.join(__dirname, 'quizplayaws.html');
+    const filePath = path.join(__dirname, 'quiz/quizplayaws.html');
     res.sendFile(filePath);
   });
   
@@ -269,7 +269,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
   app.use(express.static('public'));
   
   app.get('/fragen-linux', (req, res) => {
-    fs.readFile('linux.json', 'utf8', (err, data) => {
+    fs.readFile('data/linux.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
         res.status(500).send('Fehler beim Lesen der Fragen.');
@@ -281,14 +281,14 @@ app.delete('/delete-question/:questionId', (req, res) => {
   });
   //////////////////////////////// Linux
   app.get('/play1', (req, res) => {
-    const filePath = path.join(__dirname, 'quizplaylinux.html');
+    const filePath = path.join(__dirname, 'quiz/quizplaylinux.html');
     res.sendFile(filePath);
   });
   
   app.use(express.static('public'));
   
   app.get('/frage', (req, res) => {
-    fs.readFile('fragen.json', 'utf8', (err, data) => {
+    fs.readFile('data/fragen.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
         res.status(500).send('Fehler beim Lesen der Fragen.');
@@ -301,7 +301,7 @@ app.delete('/delete-question/:questionId', (req, res) => {
   ////////////////////////////////////////////////// play my Quiz
   
   app.get('/play2', (req, res) => {
-    const filePath = path.join(__dirname, 'playmyquiz.html');
+    const filePath = path.join(__dirname, 'quiz/playmyquiz.html');
     res.sendFile(filePath);
   });
 
@@ -315,7 +315,7 @@ app.post('/score-myquiz', (req, res) => {
   // Lese die vorhandenen Daten aus der Datei
   let existingData = [];
   try {
-    const fileData = fs.readFileSync('Punkte-myquiz.json', 'utf8');
+    const fileData = fs.readFileSync('data/Punkte-myquiz.json', 'utf8');
     existingData = JSON.parse(fileData);
   } catch (error) {
     console.error('Fehler beim Lesen der Datei: ' + error);
@@ -326,7 +326,7 @@ app.post('/score-myquiz', (req, res) => {
 
   // Speichere die aktualisierten Daten in der Datei
   try {
-    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(existingData, null, 2));
+    fs.writeFileSync('data/score-myquiz.json', JSON.stringify(existingData, null, 2));
     res.sendStatus(200);
   } catch (error) {
     console.error('Fehler beim Schreiben der Datei: ' + error);
@@ -341,14 +341,14 @@ function updateScore(username, score) {
   const user = userData.find(user => user.username === username);
   if (user) {
     user.score = score;
-    fs.writeFileSync('Punkte-myquiz.json', JSON.stringify(userData, null, 2));
+    fs.writeFileSync('data/score-myquiz.json', JSON.stringify(userData, null, 2));
   }
 }
 
 ///////////////////////////Scoreboardabfrage für Scoreboard my Quiz
 
 app.get('/score-myquiz', (req, res) => {
-  const filePath = path.join(__dirname, 'Punkte-myquiz.json');
+  const filePath = path.join(__dirname, 'data/score-myquiz.json');
   res.sendFile(filePath);
 });
 
@@ -356,7 +356,7 @@ app.get('/score-myquiz', (req, res) => {
 // Endpoint to update scores von my Quiz 
 app.post('/score-myquiz', (req, res) => {
   // Read the JSON file
-  fs.readFile('Punkte-myquiz.json', 'utf8', (err, data) => {
+  fs.readFile('data/score-myquiz.json', 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error reading JSON file');
@@ -387,7 +387,7 @@ app.post('/score-aws', (req, res) => {
   // Lese die vorhandenen Daten aus der Datei
   let existingData = [];
   try {
-    const fileData = fs.readFileSync('Punkte-aws.json', 'utf8');
+    const fileData = fs.readFileSync('data/score-aws.json', 'utf8');
     existingData = JSON.parse(fileData);
   } catch (error) {
     console.error('Fehler beim Lesen der Datei: ' + error);
@@ -398,7 +398,7 @@ app.post('/score-aws', (req, res) => {
 
   // Speichere die aktualisierten Daten in der Datei
   try {
-    fs.writeFileSync('Punkte-aws.json', JSON.stringify(existingData, null, 2));
+    fs.writeFileSync('data/score-aws.json', JSON.stringify(existingData, null, 2));
     res.sendStatus(200);
   } catch (error) {
     console.error('Fehler beim Schreiben der Datei: ' + error);
@@ -413,14 +413,14 @@ function updateScore(username, score) {
   const user = userData.find(user => user.username === username);
   if (user) {
     user.score = score;
-    fs.writeFileSync('Punkte-aws.json', JSON.stringify(userData, null, 2));
+    fs.writeFileSync('data/score-aws.json', JSON.stringify(userData, null, 2));
   }
 }
 
 ///////////////////////////Scoreboardabfrage für Scoreboard AWS
 
 app.get('/score-aws', (req, res) => {
-  const filePath = path.join(__dirname, 'Punkte-aws.json');
+  const filePath = path.join(__dirname, 'data/score-aws.json');
   res.sendFile(filePath);
 });
 
@@ -428,7 +428,7 @@ app.get('/score-aws', (req, res) => {
 // Endpoint to update scores von my Quiz 
 app.post('/score-aws', (req, res) => {
   // Read the JSON file
-  fs.readFile('Punkte-aws.json', 'utf8', (err, data) => {
+  fs.readFile('data/score-aws.json', 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error reading JSON file');
@@ -460,7 +460,7 @@ app.post('/score-linux', (req, res) => {
   // Lese die vorhandenen Daten aus der Datei
   let existingData = [];
   try {
-    const fileData = fs.readFileSync('Punkte-linux.json', 'utf8');
+    const fileData = fs.readFileSync('data/score-linux.json', 'utf8');
     existingData = JSON.parse(fileData);
   } catch (error) {
     console.error('Fehler beim Lesen der Datei: ' + error);
@@ -471,7 +471,7 @@ app.post('/score-linux', (req, res) => {
 
   // Speichere die aktualisierten Daten in der Datei
   try {
-    fs.writeFileSync('Punkte-linux.json', JSON.stringify(existingData, null, 2));
+    fs.writeFileSync('data/score-linux.json', JSON.stringify(existingData, null, 2));
     res.sendStatus(200);
   } catch (error) {
     console.error('Fehler beim Schreiben der Datei: ' + error);
@@ -486,14 +486,14 @@ function updateScore(username, score) {
   const user = userData.find(user => user.username === username);
   if (user) {
     user.score = score;
-    fs.writeFileSync('Punkte-linux.json', JSON.stringify(userData, null, 2));
+    fs.writeFileSync('data/score-linux.json', JSON.stringify(userData, null, 2));
   }
 }
 
 ///////////////////////////Scoreboardabfrage für Scoreboard Linux
 
 app.get('/score-linux', (req, res) => {
-  const filePath = path.join(__dirname, 'Punkte-linux.json');
+  const filePath = path.join(__dirname, 'data/score-linux.json');
   res.sendFile(filePath);
 });
 
@@ -501,7 +501,7 @@ app.get('/score-linux', (req, res) => {
 // Endpoint to update scores von my Quiz 
 app.post('/score-linux', (req, res) => {
   // Read the JSON file
-  fs.readFile('Punkte-linux.json', 'utf8', (err, data) => {
+  fs.readFile('score-linux.json', 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error reading JSON file');
@@ -526,24 +526,24 @@ app.post('/score-linux', (req, res) => {
 //////////////Scoreboard online
 
 app.get('/scoreboard', (req, res) => {
-  const filePath = path.join(__dirname, 'scoreboard.html');
+  const filePath = path.join(__dirname, 'scoreboard/scoreboard.html');
   res.sendFile(filePath);
 });
 
 app.get('/scoreboard-aws', (req, res) => {
-  const filePath = path.join(__dirname, 'scoreboard-aws.html');
+  const filePath = path.join(__dirname, 'scoreboard/scoreboard-aws.html');
   res.sendFile(filePath);
 });
 
 app.get('/scoreboard-linux', (req, res) => {
-  const filePath = path.join(__dirname, 'scoreboard-linux.html');
+  const filePath = path.join(__dirname, 'scoreboard/scoreboard-linux.html');
   res.sendFile(filePath);
 });
 
 /////////////////////// AllQuestion Funktion /////
 
 app.get('/frageliste', (req, res) => {
-  const filePath = path.join(__dirname, 'All-questions.html');
+  const filePath = path.join(__dirname, 'quiz/all-questions.html');
   res.sendFile(filePath);
 });
 
