@@ -34,7 +34,8 @@
         font-weight: normal;
       }
     </style>
-    <button onclick="goBack()">Zurück</button>
+    <button onclick="goBack()">Startseite</button>
+    <button onclick="goToQuiz()">Zurück zum Quiz</button>
   </head>
   <body>
     <h1>Quiz Scoreboard My Quiz</h1>
@@ -88,6 +89,16 @@
 
     // Aktualisieren des Scoreboards alle 5 Sekunden
     setInterval(updateScoreboard, 5000);
+
+    // Funktion zum Zurücknavigieren
+    function goBack() {
+      window.location.href = "/startseite";
+    }
+
+    // Funktion zum Navigieren zum Quiz
+    function goToQuiz() {
+      window.location.href = "/play2";
+    }
   </script>
 </body>
 </html>
