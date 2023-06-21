@@ -1,35 +1,8 @@
 <html>
   <head>
     <title>Quiz Scoreboard Linux</title>
-    <style>
-      body {
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      th, td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-        border-radius: 10px;
-        margin-right: 10px;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      .top-users {
-        margin-bottom: 20px;
-        font-weight: bold;
-      }
-      .user-row {
-        font-weight: normal;
-      }
-    </style>
-    <button onclick="window.location.href = '/startseite'">Startseite</button>
+    <button onclick="window.location.href='/startseite'">Startseite</button><br>
+    <button onclick="window.location.href = '/play1'">Zurück</button>
   </head>
   <body>
     <h1>Quiz Scoreboard My Quiz</h1>
@@ -82,7 +55,70 @@
     }
 
     // Aktualisieren des Scoreboards alle 5 Sekunden
-    setInterval(updateScoreboard, 500);
+    setInterval(updateScoreboard, 200);
   </script>
+  <style>
+      body {
+        font-family: 'Lucida Sans', Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      h1, p {
+        color: #e79806;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      th {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        border-radius: 10px;
+        margin-right: 10px;
+        color: #fff;
+      }
+      
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        border-radius: 10px;
+        margin-right: 10px;
+        color: #000;
+      }
+
+      th {
+        background-color: #269aae;
+      }
+      .top-users {
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+      .user-row {
+        font-weight: normal;
+        color: #e79806;
+      }
+
+      button {
+      margin-right: 10px;
+      padding: 10px 20px;
+      background-color: #269aae;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      }
+
+      button:hover {
+      background-color: #1b707e;
+      }
+    </style>
 </body>
 </html>
